@@ -95,6 +95,5 @@ def api_predict():
     else:
         app.logger.error("Invalid file type.")
         return jsonify({'error': 'Invalid file type. Please upload a valid image.'}), 400
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    app.run()
