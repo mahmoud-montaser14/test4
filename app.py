@@ -88,7 +88,7 @@ def api_predict():
             if result == "Anomalous":
                 app.logger.error("Image is anomalous and cannot be classified.")
                 return jsonify({'error': 'Image is anomalous and cannot be classified.'}), 400
-            return jsonify({result})
+            return jsonify(result)
         except Exception as e:
             app.logger.error(f"API Prediction error: {e}")
             return jsonify({'error': f"Prediction error: {str(e)}"}), 500
