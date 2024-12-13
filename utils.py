@@ -72,7 +72,7 @@ def predict_and_format_result(image_data):
         # Check for anomalies
         if is_anomalous(image_data):
             logging.info("Image detected as anomalous.")
-            return "Anomalous"
+            return "This is not an MRI image of Alzheimer's disease."
 
         # Preprocess for classification
         processed_image = preprocess_image(image_data)
@@ -86,7 +86,7 @@ def predict_and_format_result(image_data):
         # Get classification result
         output_data = interpreter.get_tensor(output_details[0]['index'])
         predicted_class_index = np.argmax(output_data)
-        class_names = ['Mild_Demented', 'Moderate_Demented', 'Non_Demented', 'Very_Mild_Demented']
+        class_names = ['Mild Alzheimer's Disease - زهايمر خفيف', 'Severe Alzheimer's Disease - زهايمر شديد', 'Normal - شخص طبيعي', 'Very Mild Alzheimer's Disease - زهايمر خفيف جدًا']
         result_class = class_names[predicted_class_index]
         max_probability = output_data[0][predicted_class_index]
 
