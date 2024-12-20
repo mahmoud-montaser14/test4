@@ -28,6 +28,17 @@ except Exception as e:
     raise RuntimeError(f"TFLite model could not be loaded: {e}")
 
 def preprocess_image(image_data, target_size=(128, 128)):
+    """
+    Preprocesses an image: loads it, converts to grayscale if necessary, resizes it with padding, 
+    and normalizes pixel values.
+
+    Args:
+        image_data: Path to the image file or file-like object.
+        target_size (tuple): Desired dimensions for the output image (height, width).
+
+    Returns:
+        np.ndarray: Preprocessed image ready for model input.
+    """
     try:
         # If image_data is a file-like object, convert it to a numpy array
         if isinstance(image_data, BytesIO):
@@ -40,19 +51,30 @@ def preprocess_image(image_data, target_size=(128, 128)):
 
         if image is None:
             raise ValueError("Could not load the image. Ensure it's a valid image file.")
-        
+
+        # Convert to grayscale if the image is not already in grayscale
+        if len(image.shape) == 3 and image.shape[2] == 3:  # Check if image has 3 color channels
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
         # Resize with padding
         old_size = image.shape[:2]
         ratio = min(target_size[0] / old_size[0], target_size[1] / old_size[1])
         new_size = tuple([int(x * ratio) for x in old_size])
         resized_image = cv2.resize(image, (new_size[1], new_size[0]), interpolation=cv2.INTER_LANCZOS4)
+        
         delta_w = target_size[1] - new_size[1]
         delta_h = target_size[0] - new_size[0]
         top, bottom = delta_h // 2, delta_h - (delta_h // 2)
         left, right = delta_w // 2, delta_w - (delta_w // 2)
-        new_image = cv2.copyMakeBorder(resized_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[0, 0, 0])
-        new_image = new_image.astype('float32') / 255.0  # Normalize to [0, 1]
-        return np.expand_dims(new_image, axis=0)
+        
+        # Pad the resized image to match the target size
+        new_image = cv2.copyMakeBorder(resized_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[0])
+        
+        # Normalize pixel values to [0, 1]
+        new_image = new_image.astype('float32') / 255.0
+
+        # Expand dimensions to add a batch dimension
+        return np.expand_dims(new_image, axis=(0, -1))  # Add batch and channel dimensions
     except Exception as e:
         logging.error(f"Error during image preprocessing: {e}")
         raise ValueError(f"Image preprocessing failed: {e}")
