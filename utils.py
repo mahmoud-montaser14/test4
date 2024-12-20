@@ -17,7 +17,7 @@ except Exception as e:
     raise RuntimeError(f"Anomaly detection model could not be loaded: {e}")
 
 try:
-    tflite_model_path = os.path.join(current_dir, "model.tflite")
+    tflite_model_path = os.path.join(current_dir, "model_(98-20)_19-12.tflite")
     interpreter = tf.lite.Interpreter(model_path=tflite_model_path)
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
@@ -27,6 +27,36 @@ except Exception as e:
     logging.error(f"Failed to load TFLite model: {e}")
     raise RuntimeError(f"TFLite model could not be loaded: {e}")
 
+# def preprocess_image(image_data, target_size=(128, 128)):
+#     try:
+#         # If image_data is a file-like object, convert it to a numpy array
+#         if isinstance(image_data, BytesIO):
+#             image_data.seek(0)  # Ensure we're at the start of the file
+#             file_bytes = np.asarray(bytearray(image_data.read()), dtype=np.uint8)
+#             image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+#         else:
+#             # Assume it's a file path
+#             image = cv2.imread(image_data)
+
+#         if image is None:
+#             raise ValueError("Could not load the image. Ensure it's a valid image file.")
+        
+#         # Resize with padding
+#         old_size = image.shape[:2]
+#         ratio = min(target_size[0] / old_size[0], target_size[1] / old_size[1])
+#         new_size = tuple([int(x * ratio) for x in old_size])
+#         resized_image = cv2.resize(image, (new_size[1], new_size[0]), interpolation=cv2.INTER_LANCZOS4)
+#         delta_w = target_size[1] - new_size[1]
+#         delta_h = target_size[0] - new_size[0]
+#         top, bottom = delta_h // 2, delta_h - (delta_h // 2)
+#         left, right = delta_w // 2, delta_w - (delta_w // 2)
+#         new_image = cv2.copyMakeBorder(resized_image, top, bottom, left, right, cv2.BORDER_CONSTANT, value=[0, 0, 0])
+#         new_image = new_image.astype('float32') / 255.0  # Normalize to [0, 1]
+#         return np.expand_dims(new_image, axis=0)
+#     except Exception as e:
+#         logging.error(f"Error during image preprocessing: {e}")
+#         raise ValueError(f"Image preprocessing failed: {e}")
+        
 def preprocess_image(image_data, target_size=(128, 128)):
     """
     Preprocesses an image: loads it, converts to grayscale if necessary, resizes it with padding, 
