@@ -9,7 +9,7 @@ from io import BytesIO
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 try:
-    autoencoder_model_path = os.path.join(current_dir, "autoencoder_model.h5")
+    autoencoder_model_path = os.path.join(current_dir, "autoencoder (1).h5")
     autoencoder = load_model(autoencoder_model_path)
     logging.info("Anomaly detection model loaded successfully.")
 except Exception as e:
@@ -57,7 +57,7 @@ def preprocess_image(image_data, target_size=(128, 128)):
         logging.error(f"Error during image preprocessing: {e}")
         raise ValueError(f"Image preprocessing failed: {e}")
 
-def is_anomalous(image_path, threshold=0.02):
+def is_anomalous(image_path, threshold=0.01):
     try:
         processed_image = preprocess_image(image_path)
         reconstructed = autoencoder.predict(processed_image)
