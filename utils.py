@@ -109,7 +109,7 @@ def preprocess_image(image_data, target_size=(128, 128)):
         logging.error(f"Error during image preprocessing: {e}")
         raise ValueError(f"Image preprocessing failed: {e}")
 
-def is_anomalous(image_path, threshold=0.01):
+def is_anomalous(image_path, threshold=0.005):
     try:
         processed_image = preprocess_image(image_path)
         reconstructed = autoencoder.predict(processed_image)
