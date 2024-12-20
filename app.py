@@ -7,7 +7,7 @@ from utils import preprocess_image, predict_and_format_result
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Limit file size to 16MB
+MAX_CONTENT_LENGTH = 0.5 * 1024 * 1024  # Limit file size to 0.5MB
 
 # Flask application
 app = Flask(__name__, template_folder='templates')
