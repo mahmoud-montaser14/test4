@@ -7,7 +7,9 @@ from utils import preprocess_image, predict_and_format_result
 
 # Allowed file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_CONTENT_LENGTH = 0.5 * 1024 * 1024  # Limit file size to 0.5MB
+# MAX_CONTENT_LENGTH = 0.5 * 1024 * 1024  # Limit file size to 0.5MB
+MAX_CONTENT_LENGTH = 150 * 1024  # Limit file size to 150 KB
+
 
 # Flask application
 app = Flask(__name__, template_folder='templates')
@@ -72,6 +74,13 @@ def index():
             return render_template('index.html', result=None, error=error_message)
 
     return render_template('index.html', result=result, image=image_filename, error=error_message)
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    app.logger.error("Uploaded file exceeds size limit.")
+    if request.content_type == 'application/json' or 'application/json' in request.headers.get('Accept', ''):
+        return jsonify({'error': 'File size exceeds the 150 KB limit.'}), 413
+    return render_template('index.html', error="File size exceeds the 150 KB limit."), 413
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
