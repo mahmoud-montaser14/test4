@@ -138,7 +138,7 @@ def predict_and_format_result(image_data):
         # Get classification result
         output_data = interpreter.get_tensor(output_details[0]['index'])
         predicted_class_index = np.argmax(output_data)
-        class_names = ["Mild Alzheimer's Disease", "Severe Alzheimer's Disease", "Normal", "Very Mild Alzheimer's Disease"]
+        class_names = ["Mild", "Severe", "Normal", "Very Mild"]
         result_class = class_names[predicted_class_index]
         max_probability = output_data[0][predicted_class_index]
 
