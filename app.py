@@ -88,7 +88,17 @@ def api_predict():
     file = request.files.get('image')
     if not file:
         app.logger.error("No file uploaded.")
-        return jsonify({'error': 'No file uploaded. Please upload an image.'}), 400
+        return "No file uploaded. Please upload an image.", 400
+
+    # Check if the file size exceeds the limit
+    file.seek(0, os.SEEK_END)  # Move to the end of the file
+    file_size = file.tell()  # Get the current position, which is the size
+    file.seek(0)  # Reset file pointer to the beginning
+
+    if file_size > MAX_CONTENT_LENGTH:
+        error_message = "File size exceeds the 0.5 MB limit."
+        app.logger.error(error_message)
+        return error_message, 400
 
     if file and allowed_file(file.filename):
         try:
@@ -96,14 +106,37 @@ def api_predict():
             result = predict_and_format_result(file_content)
             if result == "Anomalous":
                 app.logger.error("Image is anomalous and cannot be classified.")
-                return jsonify({'error': 'Image is anomalous and cannot be classified.'}), 400
-            return jsonify(result)
+                return "Image is anomalous and cannot be classified.", 400
+            return result, 200  # Directly return the class name as plain text
         except Exception as e:
             app.logger.error(f"API Prediction error: {e}")
-            return jsonify({'error': f"Prediction error: {str(e)}"}), 500
+            return f"Prediction error: {str(e)}", 500
     else:
         app.logger.error("Invalid file type.")
-        return jsonify({'error': 'Invalid file type. Please upload a valid image.'}), 400
+        return "Invalid file type. Please upload a valid image.", 400
+
+# @app.route('/api/predict', methods=['POST'])
+# def api_predict():
+#     """Handle API predictions."""
+#     file = request.files.get('image')
+#     if not file:
+#         app.logger.error("No file uploaded.")
+#         return jsonify({'error': 'No file uploaded. Please upload an image.'}), 400
+
+#     if file and allowed_file(file.filename):
+#         try:
+#             file_content = BytesIO(file.read())
+#             result = predict_and_format_result(file_content)
+#             if result == "Anomalous":
+#                 app.logger.error("Image is anomalous and cannot be classified.")
+#                 return jsonify({'error': 'Image is anomalous and cannot be classified.'}), 400
+#             return jsonify(result)
+#         except Exception as e:
+#             app.logger.error(f"API Prediction error: {e}")
+#             return jsonify({'error': f"Prediction error: {str(e)}"}), 500
+#     else:
+#         app.logger.error("Invalid file type.")
+#         return jsonify({'error': 'Invalid file type. Please upload a valid image.'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
