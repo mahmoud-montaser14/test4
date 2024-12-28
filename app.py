@@ -84,36 +84,39 @@ def request_entity_too_large(error):
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    """Handle API predictions."""
-    file = request.files.get('image')
-    if not file:
-        app.logger.error("No file uploaded.")
-        return "No file uploaded. Please upload an image.", 400
+    """Handle API predictions and return plain-text or JSON message."""
+    try:
+        file = request.files.get('image')
+        if not file:
+            app.logger.error("No file uploaded.")
+            return "No file uploaded. Please upload an image.", 400
 
-    # Check if the file size exceeds the limit
-    file.seek(0, os.SEEK_END)  # Move to the end of the file
-    file_size = file.tell()  # Get the current position, which is the size
-    file.seek(0)  # Reset file pointer to the beginning
+        # Check if the file size exceeds the limit
+        file.seek(0, os.SEEK_END)  # Move to the end of the file
+        file_size = file.tell()  # Get the current position, which is the size
+        file.seek(0)  # Reset file pointer to the beginning
 
-    if file_size > MAX_CONTENT_LENGTH:
-        error_message = "File size exceeds the 0.5 MB limit."
-        app.logger.error(error_message)
-        return error_message, 400
+        max_size_in_bytes = 150 * 1024  # 150 KB
+        if file_size > max_size_in_bytes:
+            error_message = "File size exceeds the 150 KB limit."
+            app.logger.error(error_message)
+            return error_message, 400
 
-    if file and allowed_file(file.filename):
-        try:
+        if file and allowed_file(file.filename):
             file_content = BytesIO(file.read())
             result = predict_and_format_result(file_content)
             if result == "Anomalous":
                 app.logger.error("Image is anomalous and cannot be classified.")
                 return "Image is anomalous and cannot be classified.", 400
             return result, 200  # Directly return the class name as plain text
-        except Exception as e:
-            app.logger.error(f"API Prediction error: {e}")
-            return f"Prediction error: {str(e)}", 500
-    else:
-        app.logger.error("Invalid file type.")
-        return "Invalid file type. Please upload a valid image.", 400
+
+        else:
+            app.logger.error("Invalid file type.")
+            return "Invalid file type. Please upload a valid image.", 400
+    except Exception as e:
+        app.logger.error(f"Prediction error: {e}")
+        return f"Prediction error: {str(e)}", 500
+
 
 # @app.route('/api/predict', methods=['POST'])
 # def api_predict():
